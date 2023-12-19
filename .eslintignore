@@ -1,0 +1,7 @@
+!.eslintrc.js
+coverage
+dist
+test/setup.ts
+*.js
+*.mjs
+src
