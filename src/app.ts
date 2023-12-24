@@ -84,7 +84,7 @@ app.post('/upload', (req, res) => {
     // res.send('File uploaded!');
     // @ts-ignore
     res.json({
-      image_url: `${PUBLIC_URL}/get-media/${file.name}`
+      url: `${PUBLIC_URL}/get-media/${file.name}`
     })
   });
 })
