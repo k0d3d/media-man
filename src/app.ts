@@ -21,7 +21,7 @@ import { join } from 'path'
 const fileUpload = require('express-fileupload')
 // Cache in-memory
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const cache = new Keyv('sqlite://img_cache.sqlite') as any
+const cache = new Keyv('sqlite://media/img_cache.sqlite') as any
 
 // Cache using Redis
 // const cache = new Keyv('redis://', { namespace: 'express-sharp' })
