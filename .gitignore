@@ -32,3 +32,4 @@ node_modules
 
 media
 src/media
+cache/img_cache.sqlite
