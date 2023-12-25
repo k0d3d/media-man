@@ -69,7 +69,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "start": "node dist/app.js",
     "dev": "DEBUG=v-cam-sharp* nodemon --exec 'node -r ts-node/register' -w . src/app.ts",
     "dev:debug": "DEBUG=v-cam-sharp* nodemon --exec 'node -r ts-node/register' -w . --inspect src/app.ts"
