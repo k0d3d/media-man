@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@keyv/sqlite": "^3.6.6",
     "aws-sdk": "^2.1009.0",
     "class-validator": "^0.13.1",
     "cors": "^2.8.5",
