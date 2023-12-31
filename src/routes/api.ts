@@ -1,8 +1,11 @@
 import axios from "axios";
 import crypto from "crypto";
 import fs from "fs";
-import Jimp from "jimp";
 import path from "path";
+
+import GmModule from "gm";
+
+const gm = GmModule.subClass({ imageMagick: true });
 
 export default function apiRoutes(app, PORT) {
   const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
@@ -11,25 +14,27 @@ export default function apiRoutes(app, PORT) {
     try {
       const imageUrl = req.query.url;
 
-      // Fetch the image using axios
+      // Fetch the main image using axios
       const response = await axios.get(imageUrl, {
         responseType: "arraybuffer",
       });
       const imageBuffer = Buffer.from(response.data, "binary");
 
-      // Load the image with Jimp
-      const image = await Jimp.read(imageBuffer);
+      // Create a GraphicsMagick object from the main image buffer
+      const image = gm(imageBuffer);
 
-      // Watermarking logic - you can customize the watermark as needed
-      const watermark = await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK);
-      image.print(watermark, 10, 10, `${PUBLIC_URL}`);
+      // Customize watermark position (assuming x and y are properties in the request)
+      const xPosition = req.query.x || 10;
+      const yPosition = req.query.y || 10;
 
-      // Convert the watermarked image to a buffer
-      const watermarkedBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
+      // Set the Content-Type header to specify the response is an image in PNG format
+      res.set("Content-Type", "image/png");
 
-      // Send the watermarked image as a response
-      res.set("Content-Type", Jimp.MIME_PNG);
-      res.send(watermarkedBuffer);
+      // Compose the main image with the watermark
+      image
+        .composite(path.join("src", "images", "watermark.png"))
+        .stream("png")
+        .pipe(res);
     } catch (error) {
       console.error(error);
       res.status(500).send("Internal Server Error");
