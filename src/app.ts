@@ -11,15 +11,13 @@
 
 import "dotenv/config";
 
-import axios from "axios";
 import cors from "cors";
-import crypto from "crypto";
 import express from "express";
 import { expressSharp, FsAdapter, HttpAdapter } from "express-sharp";
-import fs from "fs";
 import Keyv from "keyv";
 import { AddressInfo } from "net";
-import path, { join } from "path";
+import { join } from "path";
+import apiRoutes from "./routes/api";
 
 const fileUpload = require("express-fileupload");
 // Cache in-memory
@@ -31,13 +29,14 @@ const cache = new Keyv("sqlite://./cache/img_cache.sqlite") as any;
 const DEFAULT_PORT = 3340;
 const app = express();
 const PORT = process.env.PORT || DEFAULT_PORT;
-const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
 
+app.use(express.json());
 app.use(fileUpload());
 
 app.use(
   cors({
     origin: [
+      "http://localhost:3000", // @todo: remove after testing
       process.env.NODE_ENV !== "production"
         ? "http://localhost:3000"
         : "https://app.easyvcam.online",
@@ -67,18 +66,6 @@ app.use(
 );
 
 app.use(
-  "/share-media",
-  expressSharp({
-    cache,
-    imageAdapter: new HttpAdapter({
-      prefixUrl:
-        "https://easyvcam.online/wp-json/pxl-v-cam-app/v1/fetch-img?image_url=https://sharp.easyvcam.online/wp-media",
-    }),
-    // imageAdapter: new FsAdapter(join(__dirname, 'media')),
-  })
-);
-
-app.use(
   "/get-media",
   expressSharp({
     cache,
@@ -86,66 +73,7 @@ app.use(
   })
 );
 
-// Endpoint for file upload
-app.post("/upload", (req, res) => {
-  if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).send("No files were uploaded.");
-  }
-  // @ts-ignore
-  const file = req.files.file;
-  const uploadPath = __dirname + "/media/" + file.name;
-
-  // Use the mv() method to place the file somewhere on your server
-  file.mv(uploadPath, function (err) {
-    if (err) return res.status(500).send(err);
-
-    // res.send('File uploaded!');
-    // @ts-ignore
-    res.json({
-      url: `${PUBLIC_URL}/get-media/${file.name}`,
-    });
-  });
-});
-
-// Endpoint for file upload
-app.post("/save-image", async (req, res) => {
-  const uploadPath = __dirname + "/media/";
-
-  if (!req.body || !req.body.media_url) {
-    return res.status(400).send("No files were uploaded.");
-  }
-
-  try {
-    // Make a GET request to the image URL
-    const url = req.body.media_url;
-    const response = await axios.get(url, {
-      responseType: "arraybuffer",
-    });
-
-    // Check if the request was successful
-    if (response.status === 200) {
-      const fileExtension = path.extname(url).toLowerCase(); // Get the original file extension
-      const randomFileName = crypto.randomBytes(20).toString("hex"); // Generate a random string
-
-      // Combine the random filename and the original extension
-      const fileNameWithExtension = `${randomFileName}${fileExtension}`;
-      const filePath = path.join(uploadPath, fileNameWithExtension);
-
-      // Write the image data to the specified file path
-      fs.writeFileSync(filePath, Buffer.from(response.data, "binary"));
-      console.log("Image downloaded successfully!");
-      res.json({
-        url: `${PUBLIC_URL}/get-media/${fileNameWithExtension}`,
-      });
-    } else {
-      console.error(
-        `Failed to download image. Status code: ${response.status}`
-      );
-    }
-  } catch (error: any) {
-    console.error("Error downloading image:", error.message);
-  }
-});
+apiRoutes(app, PORT);
 
 const server = app.listen(PORT, function () {
   const { address, port } = server.address() as AddressInfo;
