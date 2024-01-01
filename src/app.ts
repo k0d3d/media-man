@@ -37,6 +37,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000", // @todo: remove after testing
+      "https://app.tohju.com",
       process.env.NODE_ENV !== "production"
         ? "http://localhost:3000"
         : "https://app.easyvcam.online",
