@@ -31,6 +31,7 @@ const app = express();
 const PORT = process.env.PORT || DEFAULT_PORT;
 
 app.use(express.json());
+app.use(express.urlencoded());
 app.use(fileUpload());
 
 app.use(

@@ -64,8 +64,6 @@ export default function apiRoutes(app, PORT) {
 
   // Endpoint for file upload
   app.post("/save-image", async (req, res) => {
-    const uploadPath = __dirname + "/media/";
-
     if (!req.body || !req.body.media_url) {
       return res.status(400).send("No files were uploaded.");
     }
@@ -84,7 +82,7 @@ export default function apiRoutes(app, PORT) {
 
         // Combine the random filename and the original extension
         const fileNameWithExtension = `${randomFileName}${fileExtension}`;
-        const filePath = path.join(uploadPath, fileNameWithExtension);
+        const filePath = path.join("media", fileNameWithExtension);
 
         // Write the image data to the specified file path
         fs.writeFileSync(filePath, Buffer.from(response.data, "binary"));
