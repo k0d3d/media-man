@@ -71,7 +71,7 @@ app.use(
   "/get-media",
   expressSharp({
     cache,
-    imageAdapter: new FsAdapter(join(__dirname, "media")),
+    imageAdapter: new FsAdapter("./media"),
   })
 );
 

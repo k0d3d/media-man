@@ -82,10 +82,12 @@ export default function apiRoutes(app, PORT) {
 
         // Combine the random filename and the original extension
         const fileNameWithExtension = `${randomFileName}${fileExtension}`;
-        const filePath = path.join("media", fileNameWithExtension);
 
         // Write the image data to the specified file path
-        fs.writeFileSync(filePath, Buffer.from(response.data, "binary"));
+        fs.writeFileSync(
+          `./media/${fileNameWithExtension}`,
+          Buffer.from(response.data, "binary")
+        );
         console.log("Image downloaded successfully!");
         res.json({
           url: `${PUBLIC_URL}/get-media/${fileNameWithExtension}`,
