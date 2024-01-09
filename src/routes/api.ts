@@ -5,6 +5,8 @@ import path from "path";
 
 import GmModule from "gm";
 
+import nanoid from "nanoid";
+
 const gm = GmModule.subClass({ imageMagick: true });
 
 export default function apiRoutes(app, PORT) {
@@ -42,13 +44,16 @@ export default function apiRoutes(app, PORT) {
   });
 
   // Endpoint for file upload
-  app.post("/upload", (req, res) => {
+  app.post("/upload", async (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).send("No files were uploaded.");
     }
     // @ts-ignore
     const file = req.files.file;
-    const uploadPath = __dirname + "/media/" + file.name;
+
+    const fileId = nanoid.nanoid(4);
+    const fileName = `${fileId}-${file.name}`;
+    const uploadPath = path.join("media", fileName); // __dirname + "/media/" + file.name;
 
     // Use the mv() method to place the file somewhere on your server
     file.mv(uploadPath, function (err) {
@@ -57,7 +62,7 @@ export default function apiRoutes(app, PORT) {
       // res.send('File uploaded!');
       // @ts-ignore
       res.json({
-        url: `${PUBLIC_URL}/get-media/${file.name}`,
+        url: `${PUBLIC_URL}/get-media/${fileName}`,
       });
     });
   });
